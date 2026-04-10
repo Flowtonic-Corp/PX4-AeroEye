@@ -592,6 +592,10 @@
                             "name": "altitude_cruise",
                             "description": "Altitude Cruise"
                         },
+                        "25": {
+                            "name": "auto_course_hold",
+                            "description": "Course Hold"
+                        },
                         "255": {
                             "name": "unknown",
                             "description": "[Unknown]"

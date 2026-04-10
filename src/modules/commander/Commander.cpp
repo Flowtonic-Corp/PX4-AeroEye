@@ -489,6 +489,10 @@ int Commander::custom_command(int argc, char *argv[])
 				send_vehicle_command(vehicle_command_s::VEHICLE_CMD_DO_SET_MODE, 1, PX4_CUSTOM_MAIN_MODE_AUTO,
 						     PX4_CUSTOM_SUB_MODE_AUTO_LOITER);
 
+			} else if (!strcmp(argv[1], "auto:course_hold")) {
+				send_vehicle_command(vehicle_command_s::VEHICLE_CMD_DO_SET_MODE, 1, PX4_CUSTOM_MAIN_MODE_AUTO,
+						     PX4_CUSTOM_SUB_MODE_AUTO_COURSE_HOLD);
+
 			} else if (!strcmp(argv[1], "auto:rtl")) {
 				send_vehicle_command(vehicle_command_s::VEHICLE_CMD_DO_SET_MODE, 1, PX4_CUSTOM_MAIN_MODE_AUTO,
 						     PX4_CUSTOM_SUB_MODE_AUTO_RTL);
@@ -890,14 +894,25 @@ Commander::handle_command(const vehicle_command_s &cmd)
 			// to not require navigator and command to receive / process
 			// the data at the exact same time.
 
-			if (_user_mode_intention.change(vehicle_status_s::NAVIGATION_STATE_AUTO_LOITER)) {
+			// If already in course hold, stay in course hold (navigator handles the altitude update)
+			uint8_t target_state = (_vehicle_status.nav_state == vehicle_status_s::NAVIGATION_STATE_AUTO_COURSE_HOLD)
+					       ? vehicle_status_s::NAVIGATION_STATE_AUTO_COURSE_HOLD
+					       : vehicle_status_s::NAVIGATION_STATE_AUTO_LOITER;
+
+			if (_user_mode_intention.change(target_state)) {
 				cmd_result = vehicle_command_ack_s::VEHICLE_CMD_RESULT_ACCEPTED;
 
 			} else {
-				printRejectMode(vehicle_status_s::NAVIGATION_STATE_AUTO_LOITER);
+				printRejectMode(target_state);
 				cmd_result = vehicle_command_ack_s::VEHICLE_CMD_RESULT_TEMPORARILY_REJECTED;
 			}
 
+		}
+		break;
+
+	case vehicle_command_s::VEHICLE_CMD_DO_CHANGE_COURSE: {
+			// DO_CHANGE_COURSE is only valid in course hold mode, navigator handles the actual course update
+			cmd_result = vehicle_command_ack_s::VEHICLE_CMD_RESULT_ACCEPTED;
 		}
 		break;
 
@@ -962,6 +977,10 @@ Commander::handle_command(const vehicle_command_s &cmd)
 
 						case PX4_CUSTOM_SUB_MODE_AUTO_PRECLAND:
 							desired_nav_state = vehicle_status_s::NAVIGATION_STATE_AUTO_PRECLAND;
+							break;
+
+						case PX4_CUSTOM_SUB_MODE_AUTO_COURSE_HOLD:
+							desired_nav_state = vehicle_status_s::NAVIGATION_STATE_AUTO_COURSE_HOLD;
 							break;
 
 						case PX4_CUSTOM_SUB_MODE_EXTERNAL1...PX4_CUSTOM_SUB_MODE_EXTERNAL8:

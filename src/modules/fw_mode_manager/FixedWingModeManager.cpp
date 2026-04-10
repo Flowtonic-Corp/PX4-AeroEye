@@ -768,6 +768,32 @@ void
 FixedWingModeManager::control_auto_position(const float control_interval, const Vector2d &curr_pos,
 		const Vector2f &ground_speed, const position_setpoint_s &pos_sp_prev, const position_setpoint_s &pos_sp_curr)
 {
+	// Course Hold: if a course is explicitly set, navigate along that bearing
+	if (PX4_ISFINITE(pos_sp_curr.course)) {
+		const float target_airspeed = pos_sp_curr.cruising_speed > FLT_EPSILON ? pos_sp_curr.cruising_speed : NAN;
+
+		const Vector2f curr_pos_local{_local_pos.x, _local_pos.y};
+		const DirectionalGuidanceOutput sp = navigateBearing(curr_pos_local, pos_sp_curr.course, ground_speed, _wind_vel);
+
+		fixed_wing_lateral_setpoint_s lateral_ctrl_sp{empty_lateral_control_setpoint};
+		lateral_ctrl_sp.timestamp = hrt_absolute_time();
+		lateral_ctrl_sp.course = sp.course_setpoint;
+		lateral_ctrl_sp.lateral_acceleration = sp.lateral_acceleration_feedforward;
+		_lateral_ctrl_sp_pub.publish(lateral_ctrl_sp);
+
+		const fixed_wing_longitudinal_setpoint_s fw_longitudinal_control_sp = {
+			.timestamp = hrt_absolute_time(),
+			.altitude = pos_sp_curr.alt,
+			.height_rate = NAN,
+			.equivalent_airspeed = target_airspeed,
+			.pitch_direct = NAN,
+			.throttle_direct = NAN
+		};
+
+		_longitudinal_ctrl_sp_pub.publish(fw_longitudinal_control_sp);
+		return;
+	}
+
 	const float acc_rad = _directional_guidance.switchDistance(500.0f);
 	const float target_airspeed = pos_sp_curr.cruising_speed > FLT_EPSILON ? pos_sp_curr.cruising_speed : NAN;
 
