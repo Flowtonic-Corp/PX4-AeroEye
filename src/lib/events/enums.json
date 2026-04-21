@@ -593,8 +593,8 @@
                             "description": "Altitude Cruise"
                         },
                         "25": {
-                            "name": "auto_course_hold",
-                            "description": "Course Hold"
+                            "name": "auto_course",
+                            "description": "Course"
                         },
                         "255": {
                             "name": "unknown",

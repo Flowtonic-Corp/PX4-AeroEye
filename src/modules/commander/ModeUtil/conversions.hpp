@@ -58,7 +58,7 @@ static inline navigation_mode_t navigation_mode(uint8_t nav_state)
 
 	case vehicle_status_s::NAVIGATION_STATE_AUTO_LOITER: return navigation_mode_t::auto_loiter;
 
-	case vehicle_status_s::NAVIGATION_STATE_AUTO_COURSE_HOLD: return navigation_mode_t::auto_course_hold;
+	case vehicle_status_s::NAVIGATION_STATE_AUTO_COURSE: return navigation_mode_t::auto_course;
 
 	case vehicle_status_s::NAVIGATION_STATE_AUTO_RTL: return navigation_mode_t::auto_rtl;
 

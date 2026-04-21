@@ -489,9 +489,9 @@ int Commander::custom_command(int argc, char *argv[])
 				send_vehicle_command(vehicle_command_s::VEHICLE_CMD_DO_SET_MODE, 1, PX4_CUSTOM_MAIN_MODE_AUTO,
 						     PX4_CUSTOM_SUB_MODE_AUTO_LOITER);
 
-			} else if (!strcmp(argv[1], "auto:course_hold")) {
+			} else if (!strcmp(argv[1], "auto:course")) {
 				send_vehicle_command(vehicle_command_s::VEHICLE_CMD_DO_SET_MODE, 1, PX4_CUSTOM_MAIN_MODE_AUTO,
-						     PX4_CUSTOM_SUB_MODE_AUTO_COURSE_HOLD);
+						     PX4_CUSTOM_SUB_MODE_AUTO_COURSE);
 
 			} else if (!strcmp(argv[1], "auto:rtl")) {
 				send_vehicle_command(vehicle_command_s::VEHICLE_CMD_DO_SET_MODE, 1, PX4_CUSTOM_MAIN_MODE_AUTO,
@@ -895,8 +895,8 @@ Commander::handle_command(const vehicle_command_s &cmd)
 			// the data at the exact same time.
 
 			// If already in course hold, stay in course hold (navigator handles the altitude update)
-			uint8_t target_state = (_vehicle_status.nav_state == vehicle_status_s::NAVIGATION_STATE_AUTO_COURSE_HOLD)
-					       ? vehicle_status_s::NAVIGATION_STATE_AUTO_COURSE_HOLD
+			uint8_t target_state = (_vehicle_status.nav_state == vehicle_status_s::NAVIGATION_STATE_AUTO_COURSE)
+					       ? vehicle_status_s::NAVIGATION_STATE_AUTO_COURSE
 					       : vehicle_status_s::NAVIGATION_STATE_AUTO_LOITER;
 
 			if (_user_mode_intention.change(target_state)) {
@@ -911,7 +911,7 @@ Commander::handle_command(const vehicle_command_s &cmd)
 		break;
 
 	case vehicle_command_s::VEHICLE_CMD_DO_CHANGE_COURSE: {
-			// DO_CHANGE_COURSE is only valid in course hold mode, navigator handles the actual course update
+			// DO_CHANGE_COURSE is only valid in course mode, navigator handles the actual course update
 			cmd_result = vehicle_command_ack_s::VEHICLE_CMD_RESULT_ACCEPTED;
 		}
 		break;
@@ -979,8 +979,8 @@ Commander::handle_command(const vehicle_command_s &cmd)
 							desired_nav_state = vehicle_status_s::NAVIGATION_STATE_AUTO_PRECLAND;
 							break;
 
-						case PX4_CUSTOM_SUB_MODE_AUTO_COURSE_HOLD:
-							desired_nav_state = vehicle_status_s::NAVIGATION_STATE_AUTO_COURSE_HOLD;
+						case PX4_CUSTOM_SUB_MODE_AUTO_COURSE:
+							desired_nav_state = vehicle_status_s::NAVIGATION_STATE_AUTO_COURSE;
 							break;
 
 						case PX4_CUSTOM_SUB_MODE_EXTERNAL1...PX4_CUSTOM_SUB_MODE_EXTERNAL8:
@@ -3236,7 +3236,7 @@ The commander module contains the state machine for mode switching and failsafe 
 	PRINT_MODULE_USAGE_COMMAND("land");
 	PRINT_MODULE_USAGE_COMMAND_DESCR("transition", "VTOL transition");
 	PRINT_MODULE_USAGE_COMMAND_DESCR("mode", "Change flight mode");
-	PRINT_MODULE_USAGE_ARG("manual|acro|offboard|stabilized|altctl|posctl|altitude_cruise|position:slow|auto:mission|auto:loiter|auto:rtl|auto:takeoff|auto:land|auto:precland|ext1",
+	PRINT_MODULE_USAGE_ARG("manual|acro|offboard|stabilized|altctl|posctl|altitude_cruise|position:slow|auto:mission|auto:loiter|auto:course|auto:rtl|auto:takeoff|auto:land|auto:precland|ext1",
 			"Flight mode", false);
 	PRINT_MODULE_USAGE_COMMAND("pair");
 	PRINT_MODULE_USAGE_COMMAND("termination");

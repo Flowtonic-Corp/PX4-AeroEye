@@ -31,21 +31,21 @@
  *
  ****************************************************************************/
 /**
- * @file course_hold.cpp
+ * @file course.cpp
  *
- * Course Hold mode: maintain constant course, altitude, and airspeed.
+ * Course mode: maintain constant course, altitude, and airspeed.
  */
 
-#include "course_hold.h"
+#include "course.h"
 #include "navigator.h"
 
-CourseHold::CourseHold(Navigator *navigator) :
-	MissionBlock(navigator, vehicle_status_s::NAVIGATION_STATE_AUTO_COURSE_HOLD)
+Course::Course(Navigator *navigator) :
+	MissionBlock(navigator, vehicle_status_s::NAVIGATION_STATE_AUTO_COURSE)
 {
 }
 
 void
-CourseHold::on_activation()
+Course::on_activation()
 {
 	// Capture current state
 	_course = _navigator->get_local_position()->heading;
@@ -58,7 +58,7 @@ CourseHold::on_activation()
 }
 
 void
-CourseHold::on_active()
+Course::on_active()
 {
 	// Check for incoming vehicle commands
 	// Commands are dispatched from navigator_main, which sets fields on this object
@@ -67,7 +67,7 @@ CourseHold::on_active()
 }
 
 void
-CourseHold::update_course_setpoint()
+Course::update_course_setpoint()
 {
 	position_setpoint_triplet_s *pos_sp_triplet = _navigator->get_position_setpoint_triplet();
 

@@ -41,7 +41,7 @@
 
 #pragma once
 
-#include "course_hold.h"
+#include "course.h"
 #include "geofence.h"
 #include "land.h"
 #include "precland.h"
@@ -177,7 +177,7 @@ public:
 	vehicle_status_s            *get_vstatus() { return &_vstatus; }
 
 	PrecLand *get_precland() { return &_precland; } /**< allow others, e.g. Mission, to use the precision land block */
-	CourseHold *get_course_hold() { return &_course_hold; }
+	Course *get_course() { return &_course; }
 
 	const PositionYawSetpoint &get_last_pos_with_gcs_heartbeat() const { return _last_pos_with_gcs_heartbeat; }
 
@@ -388,7 +388,7 @@ private:
 	Land		_land;			/**< class for handling land commands */
 	PrecLand	_precland;			/**< class for handling precision land commands */
 	RTL 		_rtl;				/**< class that handles RTL */
-	CourseHold	_course_hold;			/**< class that handles course hold */
+	Course		_course;			/**< class that handles course */
 #if CONFIG_NAVIGATOR_ADSB
 	AdsbConflict 	_adsb_conflict;			/**< class that handles ADSB conflict avoidance */
 	traffic_buffer_s _traffic_buffer{};

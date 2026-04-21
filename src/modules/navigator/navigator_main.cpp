@@ -81,7 +81,7 @@ Navigator::Navigator() :
 	_land(this),
 	_precland(this),
 	_rtl(this),
-	_course_hold(this)
+	_course(this)
 {
 	/* Create a list of our possible navigation types */
 	_navigation_mode_array[0] = &_mission;
@@ -93,7 +93,7 @@ Navigator::Navigator() :
 #if CONFIG_MODE_NAVIGATOR_VTOL_TAKEOFF
 	_navigation_mode_array[6] = &_vtol_takeoff;
 #endif //CONFIG_MODE_NAVIGATOR_VTOL_TAKEOFF
-	_navigation_mode_array[7] = &_course_hold;
+	_navigation_mode_array[7] = &_course;
 
 	/* iterate through navigation modes and initialize _mission_item for each */
 	for (unsigned int i = 0; i < NAVIGATOR_MODE_ARRAY_SIZE; i++) {
@@ -432,10 +432,10 @@ void Navigator::run()
 				// only update the setpoint if armed, as it otherwise won't get executed until the vehicle switches to loiter,
 				// which can lead to dangerous and unexpected behaviors (see loiter.cpp, there is an if(armed) in there too)
 
-				if (_navigation_mode == &_course_hold) {
-					// In course hold mode, update altitude directly
+				if (_navigation_mode == &_course) {
+					// In course mode, update altitude directly
 					float new_alt = PX4_ISFINITE(cmd.param1) ? cmd.param1 : get_global_position()->alt;
-					_course_hold.set_altitude(new_alt);
+					_course.set_altitude(new_alt);
 					// DO_CHANGE_ALTITUDE is acknowledged by commander
 
 				} else {
@@ -514,8 +514,8 @@ void Navigator::run()
 			} else if (cmd.command == vehicle_command_s::VEHICLE_CMD_DO_CHANGE_COURSE
 				   && _vstatus.arming_state == vehicle_status_s::ARMING_STATE_ARMED) {
 
-				if (_navigation_mode == &_course_hold && PX4_ISFINITE(cmd.param1)) {
-					_course_hold.set_course(cmd.param1);
+				if (_navigation_mode == &_course && PX4_ISFINITE(cmd.param1)) {
+					_course.set_course(cmd.param1);
 				}
 
 				publish_vehicle_command_ack(cmd, vehicle_command_ack_s::VEHICLE_CMD_RESULT_ACCEPTED);
@@ -723,15 +723,15 @@ void Navigator::run()
 					// XXX not differentiating ground and airspeed yet
 					set_cruising_speed(cmd.param2);
 
-					if (_navigation_mode == &_course_hold) {
-						_course_hold.set_airspeed(cmd.param2);
+					if (_navigation_mode == &_course) {
+						_course.set_airspeed(cmd.param2);
 					}
 
 				} else {
 					reset_cruising_speed();
 
-					if (_navigation_mode == &_course_hold) {
-						_course_hold.set_airspeed(-1.f);
+					if (_navigation_mode == &_course) {
+						_course.set_airspeed(-1.f);
 					}
 
 					/* if no speed target was given try to set throttle */
@@ -835,9 +835,9 @@ void Navigator::run()
 			navigation_mode_new = &_loiter;
 			break;
 
-		case vehicle_status_s::NAVIGATION_STATE_AUTO_COURSE_HOLD:
+		case vehicle_status_s::NAVIGATION_STATE_AUTO_COURSE:
 			_pos_sp_triplet_published_invalid_once = false;
-			navigation_mode_new = &_course_hold;
+			navigation_mode_new = &_course;
 			break;
 
 		case vehicle_status_s::NAVIGATION_STATE_AUTO_RTL:

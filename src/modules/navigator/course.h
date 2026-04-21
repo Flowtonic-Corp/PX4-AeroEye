@@ -31,9 +31,9 @@
  *
  ****************************************************************************/
 /**
- * @file course_hold.h
+ * @file course.h
  *
- * Course Hold mode: maintain constant course, altitude, and airspeed.
+ * Course mode: maintain constant course, altitude, and airspeed.
  * Accepts DO_CHANGE_COURSE, DO_CHANGE_ALTITUDE, and DO_CHANGE_SPEED commands.
  */
 
@@ -42,11 +42,11 @@
 #include "navigator_mode.h"
 #include "mission_block.h"
 
-class CourseHold : public MissionBlock
+class Course : public MissionBlock
 {
 public:
-	CourseHold(Navigator *navigator);
-	~CourseHold() = default;
+	Course(Navigator *navigator);
+	~Course() = default;
 
 	void on_activation() override;
 	void on_active() override;
