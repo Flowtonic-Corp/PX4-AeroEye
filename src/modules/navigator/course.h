@@ -34,7 +34,8 @@
  * @file course.h
  *
  * Course mode: maintain constant course, altitude, and airspeed.
- * Accepts DO_CHANGE_COURSE, DO_CHANGE_ALTITUDE, and DO_CHANGE_SPEED commands.
+ * Accepts DO_CHANGE_COURSE, CONDITION_YAW, DO_CHANGE_ALTITUDE, and DO_CHANGE_SPEED commands.
+ * For Condition YAW, only the Angle and relative/absolute fields are supported.
  */
 
 #pragma once
