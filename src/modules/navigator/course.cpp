@@ -33,7 +33,7 @@
 /**
  * @file course.cpp
  *
- * Course mode: maintain constant course, altitude, and airspeed.
+ * Course/Heading mode: maintain constant course or heading, altitude, and airspeed.
  */
 
 #include "course.h"
@@ -48,9 +48,20 @@ void
 Course::on_activation()
 {
 	// Capture current state
-	_course = _navigator->get_local_position()->heading;
+	_heading = _navigator->get_local_position()->heading;
 	_altitude = _navigator->get_global_position()->alt;
 	_airspeed = -1.f; // default airspeed
+
+	// Select best mode based on GPS availability
+	if (_navigator->gps_position_valid()) {
+		// GPS available: use course mode (ground track control)
+		_course = _navigator->get_local_position()->heading;
+		_use_heading = false;
+
+	} else {
+		// No GPS: use heading mode (nose direction only)
+		_use_heading = true;
+	}
 
 	_navigator->reset_cruising_speed();
 
@@ -63,7 +74,21 @@ Course::on_active()
 	// Check for incoming vehicle commands
 	// Commands are dispatched from navigator_main, which sets fields on this object
 	// before calling on_active(). Nothing to poll here - setpoint updates are
-	// triggered by set_course(), set_altitude(), set_airspeed() calls from navigator_main.
+	// triggered by set_course(), set_heading(), set_altitude(), set_airspeed() calls from navigator_main.
+}
+
+bool
+Course::set_course(float course_rad)
+{
+	if (!_navigator->gps_position_valid()) {
+		// No valid GPS - cannot use course mode
+		return false;
+	}
+
+	_course = course_rad;
+	_use_heading = false;
+	update_course_setpoint();
+	return true;
 }
 
 void
@@ -75,13 +100,35 @@ Course::update_course_setpoint()
 
 	pos_sp_triplet->current.valid = true;
 	pos_sp_triplet->current.type = position_setpoint_s::SETPOINT_TYPE_POSITION;
-	pos_sp_triplet->current.lat = _navigator->get_global_position()->lat;
-	pos_sp_triplet->current.lon = _navigator->get_global_position()->lon;
 	pos_sp_triplet->current.alt = _altitude;
-	pos_sp_triplet->current.course = _course;
+
+	if (_use_heading) {
+		// Heading mode: control nose direction (yaw)
+		// Use dummy lat/lon if GPS not available - they're not used for heading control
+		// but need to be finite for the setpoint to be considered valid
+		if (_navigator->get_local_position()->xy_global) {
+			pos_sp_triplet->current.lat = _navigator->get_global_position()->lat;
+			pos_sp_triplet->current.lon = _navigator->get_global_position()->lon;
+
+		} else {
+			// No GPS - use dummy position (not used in heading mode anyway)
+			pos_sp_triplet->current.lat = 0.0;
+			pos_sp_triplet->current.lon = 0.0;
+		}
+
+		pos_sp_triplet->current.yaw = _heading;
+		pos_sp_triplet->current.course = NAN;
+
+	} else {
+		// Course mode: control ground track (requires GPS, checked by set_course())
+		pos_sp_triplet->current.lat = _navigator->get_global_position()->lat;
+		pos_sp_triplet->current.lon = _navigator->get_global_position()->lon;
+		pos_sp_triplet->current.yaw = NAN;
+		pos_sp_triplet->current.course = _course;
+	}
+
 	pos_sp_triplet->current.cruising_speed = _airspeed;
 	pos_sp_triplet->current.cruising_throttle = NAN;
-	pos_sp_triplet->current.yaw = NAN;
 	pos_sp_triplet->current.loiter_radius = NAN;
 	pos_sp_triplet->current.acceptance_radius = _navigator->get_acceptance_radius();
 	pos_sp_triplet->current.timestamp = hrt_absolute_time();
@@ -90,3 +137,5 @@ Course::update_course_setpoint()
 
 	_navigator->set_position_setpoint_triplet_updated();
 }
+
+

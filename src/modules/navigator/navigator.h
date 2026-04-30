@@ -189,6 +189,11 @@ public:
 
 	bool home_global_position_valid() { return (_home_pos.valid_alt && _home_pos.valid_hpos); }
 
+	/**
+	 * Check if GPS position is valid (has recent 3D fix)
+	 */
+	bool gps_position_valid() { return (_gps_pos.fix_type >= 3) && (hrt_elapsed_time(&_gps_pos.timestamp) < 2_s); }
+
 	Geofence &get_geofence() { return _geofence; }
 
 	float get_default_loiter_rad() { return fabsf(_param_nav_loiter_rad.get()); }
