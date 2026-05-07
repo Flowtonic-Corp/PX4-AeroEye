@@ -570,6 +570,19 @@ FixedWingModeManager::control_auto(const float control_interval, const Vector2d 
 	position_setpoint_s current_sp = pos_sp_curr;
 	move_position_setpoint_for_vtol_transition(current_sp);
 
+	// Course and heading setpoints are handled directly before setpoint-type resolution.
+	// Dispatching here avoids handle_setpoint_type() misidentifying these as stationary
+	// position setpoints (dist_xy ≈ 0) and incorrectly downgrading them to LOITER.
+	if (PX4_ISFINITE(current_sp.course) || PX4_ISFINITE(current_sp.yaw)) {
+		control_auto_position(control_interval, curr_pos, ground_speed, pos_sp_prev, current_sp);
+
+		if (!_vehicle_status.in_transition_to_fw) {
+			publishLocalPositionSetpoint(current_sp);
+		}
+
+		return;
+	}
+
 	const uint8_t position_sp_type = handle_setpoint_type(current_sp, pos_sp_next);
 
 	_position_sp_type = position_sp_type;

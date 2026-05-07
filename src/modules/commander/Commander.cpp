@@ -876,11 +876,19 @@ Commander::handle_command(const vehicle_command_s &cmd)
 				answer_command(cmd, vehicle_command_ack_s::VEHICLE_CMD_RESULT_UNSUPPORTED);
 
 			} else {
-				if (_user_mode_intention.change(vehicle_status_s::NAVIGATION_STATE_AUTO_LOITER, getSourceFromCommand(cmd))) {
+				// If already in course mode, stay in course mode (navigator handles any altitude update)
+				// Only switch to loiter if a specific lat/lon target is given, or we are not in course mode.
+				const bool has_position_target = PX4_ISFINITE(cmd.param5) && PX4_ISFINITE(cmd.param6);
+				const bool in_course_mode = _vehicle_status.nav_state == vehicle_status_s::NAVIGATION_STATE_AUTO_COURSE;
+				const uint8_t target_state = (in_course_mode && !has_position_target)
+							     ? vehicle_status_s::NAVIGATION_STATE_AUTO_COURSE
+							     : vehicle_status_s::NAVIGATION_STATE_AUTO_LOITER;
+
+				if (_user_mode_intention.change(target_state, getSourceFromCommand(cmd))) {
 					cmd_result = vehicle_command_ack_s::VEHICLE_CMD_RESULT_ACCEPTED;
 
 				} else {
-					printRejectMode(vehicle_status_s::NAVIGATION_STATE_AUTO_LOITER);
+					printRejectMode(target_state);
 					cmd_result = vehicle_command_ack_s::VEHICLE_CMD_RESULT_TEMPORARILY_REJECTED;
 				}
 			}
