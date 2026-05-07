@@ -281,7 +281,7 @@ void Navigator::run()
 				// which can lead to dangerous and unexpected behaviors (see loiter.cpp, there is an if(armed) in there too)
 
 				// In course mode with only an altitude change (no lat/lon target), update the course altitude directly.
-				// The reposition triplet is not used in course mode — the course mode publishes its own setpoint each tick.
+				// The reposition triplet is not used in course mode — the course mode publishes its own setpoint
 				if (_navigation_mode == &_course
 				    && !PX4_ISFINITE(cmd.param5) && !PX4_ISFINITE(cmd.param6)
 				    && PX4_ISFINITE(cmd.param7)) {

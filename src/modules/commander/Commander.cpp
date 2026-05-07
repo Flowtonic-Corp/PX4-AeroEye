@@ -919,13 +919,13 @@ Commander::handle_command(const vehicle_command_s &cmd)
 		break;
 
 	case vehicle_command_s::VEHICLE_CMD_DO_CHANGE_COURSE: {
-			// DO_CHANGE_COURSE is only valid in course mode, navigator handles the actual course update
-			cmd_result = vehicle_command_ack_s::VEHICLE_CMD_RESULT_ACCEPTED;
+			// Navigator handles this command: it acks ACCEPTED when
+			// the vehicle is in course mode with a valid position, DENIED otherwise.
 		}
 		break;
 
 	case vehicle_command_s::VEHICLE_CMD_CONDITION_YAW: {
-			// CONDITION_YAW in course mode sets the course, navigator handles it
+			// In course mode, CONDITION_YAW sets heading (switches to heading control); navigator handles it.
 			cmd_result = vehicle_command_ack_s::VEHICLE_CMD_RESULT_ACCEPTED;
 		}
 		break;
