@@ -117,5 +117,3 @@ Course::update_setpoint_triplet()
 
 	_navigator->set_position_setpoint_triplet_updated();
 }
-
-
