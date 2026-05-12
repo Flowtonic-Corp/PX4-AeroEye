@@ -856,7 +856,7 @@ void Navigator::run()
 			navigation_mode_new = &_loiter;
 			break;
 
-		case vehicle_status_s::NAVIGATION_STATE_AUTO_COURSE:
+		case vehicle_status_s::NAVIGATION_STATE_GUIDED_COURSE:
 			_pos_sp_triplet_published_invalid_once = false;
 			navigation_mode_new = &_course;
 			break;

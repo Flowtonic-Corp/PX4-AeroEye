@@ -491,7 +491,7 @@ int Commander::custom_command(int argc, char *argv[])
 
 			} else if (!strcmp(argv[1], "auto:course")) {
 				send_vehicle_command(vehicle_command_s::VEHICLE_CMD_DO_SET_MODE, 1, PX4_CUSTOM_MAIN_MODE_AUTO,
-						     PX4_CUSTOM_SUB_MODE_AUTO_COURSE);
+						     PX4_CUSTOM_SUB_MODE_GUIDED_COURSE);
 
 			} else if (!strcmp(argv[1], "auto:rtl")) {
 				send_vehicle_command(vehicle_command_s::VEHICLE_CMD_DO_SET_MODE, 1, PX4_CUSTOM_MAIN_MODE_AUTO,
@@ -879,9 +879,9 @@ Commander::handle_command(const vehicle_command_s &cmd)
 				// If already in course mode, stay in course mode (navigator handles any altitude update)
 				// Only switch to loiter if a specific lat/lon target is given, or we are not in course mode.
 				const bool has_position_target = PX4_ISFINITE(cmd.param5) && PX4_ISFINITE(cmd.param6);
-				const bool in_course_mode = _vehicle_status.nav_state == vehicle_status_s::NAVIGATION_STATE_AUTO_COURSE;
+				const bool in_course_mode = _vehicle_status.nav_state == vehicle_status_s::NAVIGATION_STATE_GUIDED_COURSE;
 				const uint8_t target_state = (in_course_mode && !has_position_target)
-							     ? vehicle_status_s::NAVIGATION_STATE_AUTO_COURSE
+							     ? vehicle_status_s::NAVIGATION_STATE_GUIDED_COURSE
 							     : vehicle_status_s::NAVIGATION_STATE_AUTO_LOITER;
 
 				if (_user_mode_intention.change(target_state, getSourceFromCommand(cmd))) {
@@ -903,8 +903,8 @@ Commander::handle_command(const vehicle_command_s &cmd)
 			// the data at the exact same time.
 
 			// If already in course hold, stay in course hold (navigator handles the altitude update)
-			uint8_t target_state = (_vehicle_status.nav_state == vehicle_status_s::NAVIGATION_STATE_AUTO_COURSE)
-					       ? vehicle_status_s::NAVIGATION_STATE_AUTO_COURSE
+			uint8_t target_state = (_vehicle_status.nav_state == vehicle_status_s::NAVIGATION_STATE_GUIDED_COURSE)
+					       ? vehicle_status_s::NAVIGATION_STATE_GUIDED_COURSE
 					       : vehicle_status_s::NAVIGATION_STATE_AUTO_LOITER;
 
 			if (_user_mode_intention.change(target_state)) {
@@ -987,8 +987,8 @@ Commander::handle_command(const vehicle_command_s &cmd)
 							desired_nav_state = vehicle_status_s::NAVIGATION_STATE_AUTO_PRECLAND;
 							break;
 
-						case PX4_CUSTOM_SUB_MODE_AUTO_COURSE:
-							desired_nav_state = vehicle_status_s::NAVIGATION_STATE_AUTO_COURSE;
+						case PX4_CUSTOM_SUB_MODE_GUIDED_COURSE:
+							desired_nav_state = vehicle_status_s::NAVIGATION_STATE_GUIDED_COURSE;
 							break;
 
 						case PX4_CUSTOM_SUB_MODE_EXTERNAL1...PX4_CUSTOM_SUB_MODE_EXTERNAL8:

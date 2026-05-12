@@ -42,7 +42,7 @@
 #include <matrix/math.hpp>
 
 Course::Course(Navigator *navigator) :
-	MissionBlock(navigator, vehicle_status_s::NAVIGATION_STATE_AUTO_COURSE)
+	MissionBlock(navigator, vehicle_status_s::NAVIGATION_STATE_GUIDED_COURSE)
 {
 }
 
