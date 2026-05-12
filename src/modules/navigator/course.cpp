@@ -33,7 +33,7 @@
 /**
  * @file course.cpp
  *
- * Course/Heading mode: maintain constant course or heading, altitude, and airspeed.
+ * Course mode: maintain constant course, altitude, and airspeed.
  */
 
 #include "course.h"
@@ -51,18 +51,11 @@ Course::on_activation()
 {
 	const vehicle_local_position_s *lpos = _navigator->get_local_position();
 
-	// Capture current heading (nose direction)
-	_heading = lpos->heading;
 	_altitude = _navigator->get_global_position()->alt;
 	_airspeed = -1.f; // default airspeed
 
 	if (lpos->v_xy_valid) {
 		_course = matrix::wrap_2pi(atan2f(lpos->vy, lpos->vx));
-		_control_mode = ControlMode::Course;
-
-	} else {
-		// No valid velocity estimate: fall back to heading mode (nose direction only).
-		_control_mode = ControlMode::Heading;
 	}
 
 	_navigator->reset_cruising_speed();
@@ -73,23 +66,6 @@ Course::on_activation()
 void
 Course::on_active()
 {
-	// If horizontal velocity estimate becomes invalid while in course mode, fall back to heading mode
-	if (_control_mode == ControlMode::Course && !_navigator->get_local_position()->v_xy_valid) {
-		_heading = _navigator->get_local_position()->heading;
-		_control_mode = ControlMode::Heading;
-		update_setpoint_triplet();
-		mavlink_log_critical(_navigator->get_mavlink_log_pub(), "Course hold: velocity lost, holding current heading\t");
-		events::send(events::ID("navigator_course_gps_lost"), {events::Log::Error, events::LogInternal::Info},
-			     "Course hold: velocity estimate lost, switching to heading mode");
-	}
-}
-
-void
-Course::set_heading(float heading_rad)
-{
-	_heading = heading_rad;
-	_control_mode = ControlMode::Heading;
-	update_setpoint_triplet();
 }
 
 bool
@@ -101,7 +77,6 @@ Course::set_course(float course_rad)
 	}
 
 	_course = course_rad;
-	_control_mode = ControlMode::Course;
 	update_setpoint_triplet();
 	return true;
 }
@@ -117,38 +92,20 @@ Course::update_setpoint_triplet()
 	pos_sp_triplet->current.type = position_setpoint_s::SETPOINT_TYPE_POSITION;
 	pos_sp_triplet->current.alt = _altitude;
 
-	if (_control_mode == ControlMode::Heading) {
-		// Heading mode: control nose direction (yaw).
-		// lat/lon must be finite for the setpoint to be valid;
-		// use current position if available, otherwise dummy values (not used by the controller in heading mode).
-		if (_navigator->get_local_position()->xy_global) {
-			pos_sp_triplet->current.lat = _navigator->get_global_position()->lat;
-			pos_sp_triplet->current.lon = _navigator->get_global_position()->lon;
-
-		} else {
-			pos_sp_triplet->current.lat = 0.0;
-			pos_sp_triplet->current.lon = 0.0;
-		}
-
-		pos_sp_triplet->current.yaw = _heading;
-		pos_sp_triplet->current.course = NAN;
+	// Course mode: control ground track.
+	// lat/lon must be finite for the setpoint to be valid;
+	// use current position if available (including during dead-reckoning), otherwise dummy values.
+	if (_navigator->get_local_position()->xy_global) {
+		pos_sp_triplet->current.lat = _navigator->get_global_position()->lat;
+		pos_sp_triplet->current.lon = _navigator->get_global_position()->lon;
 
 	} else {
-		// Course mode: control ground track.
-		// lat/lon must be finite for the setpoint to be valid;
-		// use current position if available (including during dead-reckoning), otherwise dummy values.
-		if (_navigator->get_local_position()->xy_global) {
-			pos_sp_triplet->current.lat = _navigator->get_global_position()->lat;
-			pos_sp_triplet->current.lon = _navigator->get_global_position()->lon;
-
-		} else {
-			pos_sp_triplet->current.lat = 0.0;
-			pos_sp_triplet->current.lon = 0.0;
-		}
-
-		pos_sp_triplet->current.yaw = NAN;
-		pos_sp_triplet->current.course = _course;
+		pos_sp_triplet->current.lat = 0.0;
+		pos_sp_triplet->current.lon = 0.0;
 	}
+
+	pos_sp_triplet->current.yaw = NAN;
+	pos_sp_triplet->current.course = _course;
 
 	pos_sp_triplet->current.cruising_speed = _airspeed;
 	pos_sp_triplet->current.cruising_throttle = NAN;

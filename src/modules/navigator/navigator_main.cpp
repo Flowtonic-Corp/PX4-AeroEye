@@ -541,27 +541,6 @@ void Navigator::run()
 
 				publish_vehicle_command_ack(cmd, result);
 
-			} else if (cmd.command == vehicle_command_s::VEHICLE_CMD_CONDITION_YAW
-				   && _vstatus.arming_state == vehicle_status_s::ARMING_STATE_ARMED) {
-
-				uint8_t result{vehicle_command_ack_s::VEHICLE_CMD_RESULT_ACCEPTED};
-
-				if (_navigation_mode == &_course && PX4_ISFINITE(cmd.param1)) {
-					// CONDITION_YAW sets heading (airspeed direction), not course
-					// param1: target angle [deg], 0 = north
-					// param4: 0 = absolute, 1 = relative to current heading
-					float heading_rad = cmd.param1 * M_DEG_TO_RAD_F;
-
-					if (static_cast<float>(cmd.param4) > 0.5f) {
-						// Relative: add to current heading
-						heading_rad = matrix::wrap_2pi(get_local_position()->heading + heading_rad);
-					}
-
-					_course.set_heading(heading_rad);
-				}
-
-				publish_vehicle_command_ack(cmd, result);
-
 			} else if (cmd.command == vehicle_command_s::VEHICLE_CMD_DO_ORBIT &&
 				   get_vstatus()->vehicle_type == vehicle_status_s::VEHICLE_TYPE_FIXED_WING) {
 

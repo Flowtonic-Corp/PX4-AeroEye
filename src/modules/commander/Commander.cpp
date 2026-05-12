@@ -924,12 +924,6 @@ Commander::handle_command(const vehicle_command_s &cmd)
 		}
 		break;
 
-	case vehicle_command_s::VEHICLE_CMD_CONDITION_YAW: {
-			// In course mode, CONDITION_YAW sets heading (switches to heading control); navigator handles it.
-			cmd_result = vehicle_command_ack_s::VEHICLE_CMD_RESULT_ACCEPTED;
-		}
-		break;
-
 	case vehicle_command_s::VEHICLE_CMD_DO_SET_MODE: {
 			uint8_t base_mode = (uint8_t)cmd.param1;
 			uint8_t custom_main_mode = (uint8_t)cmd.param2;

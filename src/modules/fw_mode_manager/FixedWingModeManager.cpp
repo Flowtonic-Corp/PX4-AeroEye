@@ -570,8 +570,8 @@ FixedWingModeManager::control_auto(const float control_interval, const Vector2d 
 	position_setpoint_s current_sp = pos_sp_curr;
 	move_position_setpoint_for_vtol_transition(current_sp);
 
-	// Course and heading setpoints are handled directly to avoid entering hold mode
-	if (PX4_ISFINITE(current_sp.course) || PX4_ISFINITE(current_sp.yaw)) {
+	// Course setpoints are handled directly to avoid entering hold mode
+	if (PX4_ISFINITE(current_sp.course)) {
 		control_auto_position(control_interval, curr_pos, ground_speed, pos_sp_prev, current_sp);
 
 		if (!_vehicle_status.in_transition_to_fw) {
@@ -790,28 +790,6 @@ FixedWingModeManager::control_auto_position(const float control_interval, const 
 		lateral_ctrl_sp.timestamp = hrt_absolute_time();
 		lateral_ctrl_sp.course = sp.course_setpoint;
 		lateral_ctrl_sp.lateral_acceleration = sp.lateral_acceleration_feedforward;
-		_lateral_ctrl_sp_pub.publish(lateral_ctrl_sp);
-
-		const fixed_wing_longitudinal_setpoint_s fw_longitudinal_control_sp = {
-			.timestamp = hrt_absolute_time(),
-			.altitude = pos_sp_curr.alt,
-			.height_rate = NAN,
-			.equivalent_airspeed = target_airspeed,
-			.pitch_direct = NAN,
-			.throttle_direct = NAN
-		};
-
-		_longitudinal_ctrl_sp_pub.publish(fw_longitudinal_control_sp);
-		return;
-	}
-
-	// Heading Hold: if yaw is explicitly set (no course), control airspeed direction directly (GPS-independent)
-	if (PX4_ISFINITE(pos_sp_curr.yaw)) {
-		const float target_airspeed = pos_sp_curr.cruising_speed > FLT_EPSILON ? pos_sp_curr.cruising_speed : NAN;
-
-		fixed_wing_lateral_setpoint_s lateral_ctrl_sp{empty_lateral_control_setpoint};
-		lateral_ctrl_sp.timestamp = hrt_absolute_time();
-		lateral_ctrl_sp.airspeed_direction = pos_sp_curr.yaw;
 		_lateral_ctrl_sp_pub.publish(lateral_ctrl_sp);
 
 		const fixed_wing_longitudinal_setpoint_s fw_longitudinal_control_sp = {

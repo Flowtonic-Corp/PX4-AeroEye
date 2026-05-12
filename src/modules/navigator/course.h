@@ -33,13 +33,10 @@
 /**
  * @file course.h
  *
- * Course/Heading mode: maintain constant course or heading, altitude, and airspeed.
- * On activation, tracks course if position is available, otherwise heading.
- * Falls back to heading hold automatically on position loss.
+ * Course mode: maintain constant course, altitude, and airspeed.
  *
- * Accepts MAV_CMD_DO_CHANGE_ALTITUDE, VEHICLE_CMD_DO_REPOSITION, DO_CHANGE_COURSE, CONDITION_YAW and DO_CHANGE_SPEED commands.
+ * Accepts MAV_CMD_DO_CHANGE_ALTITUDE, VEHICLE_CMD_DO_REPOSITION, DO_CHANGE_COURSE and DO_CHANGE_SPEED commands.
  * - DO_CHANGE_COURSE: sets course (ground track direction, requires valid position).
- * - CONDITION_YAW: sets heading (airspeed direction), switches to heading control.
  */
 
 #pragma once
@@ -63,26 +60,16 @@ public:
 	 */
 	bool set_course(float course_rad);
 
-	/**
-	 * Set heading (nose/airspeed direction). position-independent. Switches to heading control.
-	 * @param heading_rad Heading angle in radians, 0 = north
-	 */
-	void set_heading(float heading_rad);
-
 	void set_altitude(float alt_amsl) { _altitude = alt_amsl; update_setpoint_triplet(); }
 	void set_airspeed(float airspeed) { _airspeed = airspeed; update_setpoint_triplet(); }
 
 private:
 	/**
-	 * Update the position setpoint triplet to fly the current course or heading.
+	 * Update the position setpoint triplet to fly the current course.
 	 */
 	void update_setpoint_triplet();
 
-	enum class ControlMode { Course, Heading };
-
-	ControlMode _control_mode{ControlMode::Course};
 	float _course{0.f};		///< [rad] current course bearing (ground track)
-	float _heading{0.f};		///< [rad] current heading setpoint (nose direction)
 	float _altitude{0.f};		///< [m] AMSL altitude setpoint
 	float _airspeed{-1.f};		///< [m/s] cruising speed setpoint (-1 = default)
 };
