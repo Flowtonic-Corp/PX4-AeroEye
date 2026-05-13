@@ -40,7 +40,7 @@ Airspeed is actively controlled if an airspeed sensor is installed in any autono
   The mode can be used to pause a mission or to help regain control of a vehicle in an emergency.
   It can be activated with a pre-programmed RC switch or the QGroundControl Pause button.
 - [Guided Course](../flight_modes_fw/guided_course.md) — Vehicle maintains a constant ground track, altitude, and airspeed.
-  The operator commands course, altitude, and airspeed changes in real time from the GCS. No manual stick input is required.
+  The operator commands course, altitude, and airspeed changes in real time from the GCS. Manual stick input is ignored.
 - [Return](../flight_modes_fw/return.md) — Vehicle flies a clear path to land at a safe location.
   By default the destination is a mission landing pattern.
   The mode may be activated manually (via a pre-programmed RC switch) or automatically (i.e. in the event of a failsafe being triggered).
