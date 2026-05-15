@@ -516,7 +516,8 @@ void Navigator::run()
 
 				uint8_t result{vehicle_command_ack_s::VEHICLE_CMD_RESULT_DENIED};
 
-				if (_navigation_mode == &_course && PX4_ISFINITE(cmd.param1)) {
+				if (_vstatus.vehicle_type == vehicle_status_s::VEHICLE_TYPE_FIXED_WING
+				    && _navigation_mode == &_course && PX4_ISFINITE(cmd.param1)) {
 					// param1: course angle [deg], 0 = north, converted to radians
 					float course_rad = cmd.param1 * M_DEG_TO_RAD_F;
 
@@ -524,7 +525,7 @@ void Navigator::run()
 						result = vehicle_command_ack_s::VEHICLE_CMD_RESULT_ACCEPTED;
 					}
 
-					// DENIED if no GPS available for course mode
+					// DENIED if no positioning available for course mode, or if we are not in fixed wing mode
 				}
 
 				publish_vehicle_command_ack(cmd, result);
