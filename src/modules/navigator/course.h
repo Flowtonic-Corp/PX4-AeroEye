@@ -61,7 +61,6 @@ public:
 	bool set_course(float course_rad);
 
 	void set_altitude(float alt_amsl) { _altitude = alt_amsl; update_setpoint_triplet(); }
-	void set_airspeed(float airspeed) { _airspeed = airspeed; update_setpoint_triplet(); }
 
 private:
 	/**
@@ -71,5 +70,4 @@ private:
 
 	float _course{0.f};		///< [rad] current course bearing (ground track)
 	float _altitude{0.f};		///< [m] AMSL altitude setpoint
-	float _airspeed{-1.f};		///< [m/s] cruising speed setpoint (-1 = default)
 };

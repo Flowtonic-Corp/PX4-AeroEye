@@ -52,7 +52,6 @@ Course::on_activation()
 	const vehicle_local_position_s *lpos = _navigator->get_local_position();
 
 	_altitude = _navigator->get_global_position()->alt;
-	_airspeed = -1.f; // default airspeed
 
 	if (lpos->v_xy_valid) {
 		_course = matrix::wrap_2pi(atan2f(lpos->vy, lpos->vx));
@@ -107,7 +106,7 @@ Course::update_setpoint_triplet()
 	pos_sp_triplet->current.yaw = NAN;
 	pos_sp_triplet->current.course = _course;
 
-	pos_sp_triplet->current.cruising_speed = _airspeed;
+	pos_sp_triplet->current.cruising_speed = _navigator->get_cruising_speed();
 	pos_sp_triplet->current.cruising_throttle = NAN;
 	pos_sp_triplet->current.loiter_radius = NAN;
 	pos_sp_triplet->current.acceptance_radius = _navigator->get_acceptance_radius();

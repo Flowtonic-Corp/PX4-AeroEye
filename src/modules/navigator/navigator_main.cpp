@@ -732,16 +732,8 @@ void Navigator::run()
 					// XXX not differentiating ground and airspeed yet
 					set_cruising_speed(cmd.param2);
 
-					if (_navigation_mode == &_course) {
-						_course.set_airspeed(cmd.param2);
-					}
-
 				} else {
 					reset_cruising_speed();
-
-					if (_navigation_mode == &_course) {
-						_course.set_airspeed(-1.f);
-					}
 
 					/* if no speed target was given try to set throttle */
 					if (cmd.param3 > FLT_EPSILON) {
