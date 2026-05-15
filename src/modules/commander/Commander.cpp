@@ -896,25 +896,17 @@ Commander::handle_command(const vehicle_command_s &cmd)
 		break;
 
 	case vehicle_command_s::VEHICLE_CMD_DO_CHANGE_ALTITUDE: {
+			// Accept only in modes where the navigator handles altitude changes in-place.
+			// No mode switching: if the current mode doesn't support it, deny.
+			const uint8_t nav_state = _vehicle_status.nav_state;
 
-			// Just switch the flight mode here, the navigator takes care of
-			// doing something sensible with the coordinates. Its designed
-			// to not require navigator and command to receive / process
-			// the data at the exact same time.
-
-			// If already in course hold, stay in course hold (navigator handles the altitude update)
-			uint8_t target_state = (_vehicle_status.nav_state == vehicle_status_s::NAVIGATION_STATE_GUIDED_COURSE)
-					       ? vehicle_status_s::NAVIGATION_STATE_GUIDED_COURSE
-					       : vehicle_status_s::NAVIGATION_STATE_AUTO_LOITER;
-
-			if (_user_mode_intention.change(target_state)) {
+			if (nav_state == vehicle_status_s::NAVIGATION_STATE_GUIDED_COURSE
+			    || nav_state == vehicle_status_s::NAVIGATION_STATE_AUTO_LOITER) {
 				cmd_result = vehicle_command_ack_s::VEHICLE_CMD_RESULT_ACCEPTED;
 
 			} else {
-				printRejectMode(target_state);
-				cmd_result = vehicle_command_ack_s::VEHICLE_CMD_RESULT_TEMPORARILY_REJECTED;
+				cmd_result = vehicle_command_ack_s::VEHICLE_CMD_RESULT_DENIED;
 			}
-
 		}
 		break;
 
