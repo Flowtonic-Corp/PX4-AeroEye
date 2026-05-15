@@ -92,8 +92,9 @@ Course::update_setpoint_triplet()
 	pos_sp_triplet->current.alt = _altitude;
 
 	// Course mode: control ground track.
-	// lat/lon must be finite for the setpoint to be valid;
-	// use current position if available (including during dead-reckoning), otherwise dummy values.
+	// lat/lon are not used for course guidance but FixedWingModeManager::set_control_mode_current() requires
+	// PX4_ISFINITE(lat) && PX4_ISFINITE(lon) to classify the setpoint as valid and enter FW_POSCTRL_MODE_AUTO.
+	// Use current position if available (including during dead-reckoning), otherwise dummy values.
 	if (_navigator->get_local_position()->xy_global) {
 		pos_sp_triplet->current.lat = _navigator->get_global_position()->lat;
 		pos_sp_triplet->current.lon = _navigator->get_global_position()->lon;
