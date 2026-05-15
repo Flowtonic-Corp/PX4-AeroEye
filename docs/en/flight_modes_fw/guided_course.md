@@ -3,7 +3,7 @@
 <img src="../../assets/site/position_fixed.svg" title="Position required (e.g. GPS)" width="30px" />
 
 _Guided Course mode_ maintains a constant ground track (course), altitude, and airspeed without any manual stick input.
-The operator controls the vehicle entirely via GCS commands, making it the guided equivalent of [Position mode](../flight_modes_fw/position.md).
+The operator controls the vehicle entirely via [GCS commands](#in-flight-commands), making it the guided equivalent of [Position mode](../flight_modes_fw/position.md).
 
 :::tip
 This mode is suited to situations where an operator wants to guide a fixed-wing vehicle from a GCS without manual control.
@@ -13,7 +13,7 @@ This mode is suited to situations where an operator wants to guide a fixed-wing 
 
 - Requires a horizontal velocity estimate (e.g. GPS/dead-reckoning).
   Course commands will be rejected if the velocity estimate is unavailable.
-- RC stick movement is ignored.
+- Manual control input is ignored.
 
 <!-- https://github.com/PX4/PX4-Autopilot/blob/main/src/modules/commander/ModeUtil/mode_requirements.cpp -->
 
@@ -21,12 +21,12 @@ This mode is suited to situations where an operator wants to guide a fixed-wing 
 
 ## Overview
 
-On activation, the vehicle captures its current velocity vector as the initial course bearing and holds altitude and airspeed from the moment of activation.
+On activation, the vehicle captures its current velocity over ground vector as the initial course bearing and holds altitude and airspeed from the moment of activation.
 The vehicle then flies that course indefinitely until the operator issues a new command.
 
 There is no waypoint sequencing or autonomous path planning: the GCS guides the vehicle in real time by sending individual commands.
 
-## In-flight commands
+## Supported Commands
 
 The following commands are accepted while in Guided Course mode:
 
@@ -34,7 +34,6 @@ The following commands are accepted while in Guided Course mode:
 | ---------------------------- | ------------------------------------------------------------------------------------------------------- |
 | `MAV_CMD_DO_CHANGE_COURSE`   | Set a new course bearing (degrees, 0 = north). Rejected if horizontal velocity estimate is unavailable. |
 | [MAV_CMD_DO_CHANGE_ALTITUDE] | Set a new target altitude (AMSL, metres).                                                               |
-| [MAV_CMD_DO_REPOSITION]      | Set a new target altitude via param7.                                                                   |
 | [MAV_CMD_DO_CHANGE_SPEED]    | Set a new equivalent airspeed via param2 (m/s). If param2 ≤ 0, the default cruise speed is restored.    |
 
 [MAV_CMD_DO_CHANGE_ALTITUDE]: https://mavlink.io/en/messages/common.html#MAV_CMD_DO_CHANGE_ALTITUDE
