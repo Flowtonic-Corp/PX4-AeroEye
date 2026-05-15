@@ -573,11 +573,6 @@ FixedWingModeManager::control_auto(const float control_interval, const Vector2d 
 	// Course setpoints are handled directly to avoid entering hold mode
 	if (PX4_ISFINITE(current_sp.course)) {
 		control_auto_position(control_interval, curr_pos, ground_speed, pos_sp_prev, current_sp);
-
-		if (!_vehicle_status.in_transition_to_fw) {
-			publishLocalPositionSetpoint(current_sp);
-		}
-
 		return;
 	}
 
