@@ -910,7 +910,7 @@ Commander::handle_command(const vehicle_command_s &cmd)
 		}
 		break;
 
-	case vehicle_command_s::VEHICLE_CMD_DO_CHANGE_COURSE: {
+	case vehicle_command_s::VEHICLE_CMD_GUIDED_CHANGE_HEADING: {
 			// Navigator handles this command: it acks ACCEPTED when
 			// the vehicle is in course mode with a valid position, DENIED otherwise.
 		}

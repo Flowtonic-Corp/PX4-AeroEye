@@ -525,21 +525,24 @@ void Navigator::run()
 					// DO_CHANGE_ALTITUDE is acknowledged by commander
 				} // else (not course hold)
 
-			} else if (cmd.command == vehicle_command_s::VEHICLE_CMD_DO_CHANGE_COURSE
+			} else if (cmd.command == vehicle_command_s::VEHICLE_CMD_GUIDED_CHANGE_HEADING
 				   && _vstatus.arming_state == vehicle_status_s::ARMING_STATE_ARMED) {
 
 				uint8_t result{vehicle_command_ack_s::VEHICLE_CMD_RESULT_DENIED};
 
+				// param1: heading type (0 = HEADING_TYPE_COURSE_OVER_GROUND)
+				// param2: target bearing [deg, 0=north]
+				const bool control_course = (lroundf(cmd.param1) == 0);
+
 				if (_vstatus.vehicle_type == vehicle_status_s::VEHICLE_TYPE_FIXED_WING
-				    && _navigation_mode == &_course && PX4_ISFINITE(cmd.param1)) {
-					// param1: course angle [deg], 0 = north, converted to radians
-					float course_rad = cmd.param1 * M_DEG_TO_RAD_F;
+				    && _navigation_mode == &_course && control_course && PX4_ISFINITE(cmd.param2)) {
+					float course_rad = cmd.param2 * M_DEG_TO_RAD_F;
 
 					if (_course.set_course(course_rad)) {
 						result = vehicle_command_ack_s::VEHICLE_CMD_RESULT_ACCEPTED;
 					}
 
-					// DENIED if no positioning available for course mode, or if we are not in fixed wing mode
+					// DENIED if not FW, not in course mode, not correct heading type, or no positioning available
 				}
 
 				publish_vehicle_command_ack(cmd, result);

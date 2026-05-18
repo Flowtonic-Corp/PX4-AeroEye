@@ -35,8 +35,8 @@
  *
  * Course mode: maintain constant course, altitude, and airspeed.
  *
- * Accepts MAV_CMD_DO_CHANGE_ALTITUDE, VEHICLE_CMD_DO_REPOSITION, DO_CHANGE_COURSE and DO_CHANGE_SPEED commands.
- * - DO_CHANGE_COURSE: sets course (ground track direction, requires valid position).
+ * Accepts MAV_CMD_DO_CHANGE_ALTITUDE, MAV_CMD_GUIDED_CHANGE_HEADING and MAV_CMD_DO_CHANGE_SPEED commands.
+ * - MAV_CMD_GUIDED_CHANGE_HEADING (param1=HEADING_TYPE_COURSE_OVER_GROUND): sets course (ground track direction, requires valid position).
  */
 
 #pragma once
