@@ -433,9 +433,23 @@ void Navigator::run()
 				// which can lead to dangerous and unexpected behaviors (see loiter.cpp, there is an if(armed) in there too)
 
 				if (_navigation_mode == &_course) {
-					// In course mode, update altitude directly
+					// In course mode, update altitude directly (after geofence check)
 					float new_alt = PX4_ISFINITE(cmd.param1) ? cmd.param1 : get_global_position()->alt;
-					_course.set_altitude(new_alt);
+
+					vehicle_global_position_s position_setpoint{};
+					position_setpoint.lat = get_global_position()->lat;
+					position_setpoint.lon = get_global_position()->lon;
+					position_setpoint.alt = new_alt;
+
+					if (geofence_allows_position(position_setpoint)) {
+						_course.set_altitude(new_alt);
+
+					} else {
+						mavlink_log_critical(&_mavlink_log_pub, "Altitude change is outside geofence\t");
+						events::send(events::ID("navigator_course_change_altitude_outside_geofence"), {events::Log::Error, events::LogInternal::Info},
+							     "Altitude change is outside geofence");
+					}
+
 					// DO_CHANGE_ALTITUDE is acknowledged by commander
 
 				} else {
