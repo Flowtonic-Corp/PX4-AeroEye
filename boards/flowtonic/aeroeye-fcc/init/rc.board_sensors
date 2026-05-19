@@ -1,31 +1,60 @@
 #!/bin/sh
 #
-# PX4 FMUv5 specific board sensors init
+# Flowtonic AeroEye FCC specific board sensors init (fmu-v5 base)
 #------------------------------------------------------------------------------
 
 board_adc start
 
-if ver hwtypecmp V5005002 V5006002
+if ver hwtypecmp V5005003
+then
+	# ==========================================================
+	# Flowtonic AeroEye FCC (V553) — Phase A: ICM-42688-P only
+	# Phase B (BMI088) / C (BMP581) / D (IST8310 + ELVX) 후속 추가
+	# ==========================================================
+	# ICM-42688-P 가 보드 하단에 장착 → ROLL_180 (ROTATION enum = 8)
+	icm42688p -s -R 8 -q start
+
+	# BMP581 barometer (SPI4, CS=PF10, DRDY=PE7)
+	bmp581 -s start
+
+elif ver hwtypecmp V5005002 V5006002
 then
 	# Internal SPI bus ICM-42688-P
 	icm42688p -s -R 2 -q start
+
+	# Internal SPI bus ICM-20689
+	icm20689 -s -R 2 start
+
+	# Internal SPI bus BMI055 accel/gyro
+	bmi055 -A -R 2 -s start
+	bmi055 -G -R 2 -s start
+
+	# Baro on internal SPI
+	ms5611 -s start
+
+	# internal compass
+	ist8310 -I -R 10 start
+
+	# External compass on GPS1/I2C1
+	ist8310 -X -b 1 -R 10 start
+
 else
 	# Internal SPI bus ICM-20602
 	icm20602 -s -R 2 -q start
+
+	# Internal SPI bus ICM-20689
+	icm20689 -s -R 2 start
+
+	# Internal SPI bus BMI055 accel/gyro
+	bmi055 -A -R 2 -s start
+	bmi055 -G -R 2 -s start
+
+	# Baro on internal SPI
+	ms5611 -s start
+
+	# internal compass
+	ist8310 -I -R 10 start
+
+	# External compass on GPS1/I2C1
+	ist8310 -X -b 1 -R 10 start
 fi
-
-# Internal SPI bus ICM-20689
-icm20689 -s -R 2 start
-
-# Internal SPI bus BMI055 accel/gyro
-bmi055 -A -R 2 -s start
-bmi055 -G -R 2 -s start
-
-# Baro on internal SPI
-ms5611 -s start
-
-# internal compass
-ist8310 -I -R 10 start
-
-# External compass on GPS1/I2C1 (the 3rd external bus): standard Holybro Pixhawk 4 or CUAV V5 GPS/compass puck (with lights, safety button, and buzzer)
-ist8310 -X -b 1 -R 10 start

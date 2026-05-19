@@ -186,7 +186,7 @@
 #define GPIO_HW_VER_SENSE    /* PC2   */ ADC1_GPIO(12)
 
 #define HW_INFO_INIT_PREFIX         "V5"
-#define BOARD_NUM_SPI_CFG_HW_VERSIONS 3
+#define BOARD_NUM_SPI_CFG_HW_VERSIONS 4
 #define V500   HW_VER_REV(0x0,0x0) // FMUV5,                    Rev 0
 #define V515   HW_VER_REV(0x1,0x5) // CUAV V5,                  Rev 5
 #define V540   HW_VER_REV(0x4,0x0) // HolyBro mini no can 2,3,  Rev 0

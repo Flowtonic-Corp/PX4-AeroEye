@@ -110,6 +110,32 @@ constexpr px4_spi_bus_all_hw_t px4_spi_buses_all_hw[BOARD_NUM_SPI_CFG_HW_VERSION
 			initSPIConfigExternal(SPI::CS{GPIO::PortI, GPIO::Pin8})
 		}),
 	}),
+
+	// [Flowtonic AeroEye FCC, HW VER=5 REV=3]
+	// Phase A: ICM-42688-P (SPI1) + BMP581 (SPI4). 나머지는 fmu-v5 V552 구조 미러.
+	// NuttX defconfig 가 SPI1/2/4/5/6 을 활성화하므로 validateSPIConfig 통과 위해 5개 bus 모두 정의 필수.
+	// BMI088 (SPI5) / FRAM (SPI2) 실제 핀 매핑은 후속 phase 에 교체.
+	initSPIHWVersion(V553, {
+		initSPIBus(SPI::Bus::SPI1, {
+			initSPIDevice(DRV_IMU_DEVTYPE_ICM42688P, SPI::CS{GPIO::PortF, GPIO::Pin2}, SPI::DRDY{GPIO::PortB, GPIO::Pin4}),
+		}, {GPIO::PortE, GPIO::Pin3}),
+		initSPIBus(SPI::Bus::SPI2, {
+			initSPIDevice(SPIDEV_FLASH(0), SPI::CS{GPIO::PortF, GPIO::Pin5})
+		}),
+		initSPIBus(SPI::Bus::SPI4, {
+			initSPIDevice(DRV_BARO_DEVTYPE_BMP581, SPI::CS{GPIO::PortF, GPIO::Pin10}, SPI::DRDY{GPIO::PortE, GPIO::Pin7}),
+		}),
+		initSPIBusExternal(SPI::Bus::SPI5, {
+			initSPIConfigExternal(SPI::CS{GPIO::PortI, GPIO::Pin4}, SPI::DRDY{GPIO::PortD, GPIO::Pin15}),
+			initSPIConfigExternal(SPI::CS{GPIO::PortI, GPIO::Pin10}),
+			initSPIConfigExternal(SPI::CS{GPIO::PortI, GPIO::Pin11})
+		}),
+		initSPIBusExternal(SPI::Bus::SPI6, {
+			initSPIConfigExternal(SPI::CS{GPIO::PortI, GPIO::Pin6}),
+			initSPIConfigExternal(SPI::CS{GPIO::PortI, GPIO::Pin7}),
+			initSPIConfigExternal(SPI::CS{GPIO::PortI, GPIO::Pin8})
+		}),
+	}),
 };
 
 static constexpr bool unused = validateSPIConfig(px4_spi_buses_all_hw);
