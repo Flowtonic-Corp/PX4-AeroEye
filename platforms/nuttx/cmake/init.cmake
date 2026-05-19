@@ -63,6 +63,47 @@ set(NUTTX_APPS_DIR ${PX4_SOURCE_DIR}/platforms/nuttx/NuttX/apps CACHE FILEPATH "
 px4_add_git_submodule(TARGET git_nuttx PATH "${NUTTX_SRC_DIR}/nuttx")
 px4_add_git_submodule(TARGET git_nuttx_apps PATH "${NUTTX_SRC_DIR}/apps")
 
+# Apply board-specific NuttX patches if present (idempotent).
+# Place .patch files in ${PX4_BOARD_DIR}/patches/nuttx/*.patch — they are
+# applied to the NuttX submodule before the olddefconfig step. Apply check
+# uses `git apply --reverse --check` to detect already-applied patches.
+set(BOARD_NUTTX_PATCH_DIR "${PX4_BOARD_DIR}/patches/nuttx")
+if(EXISTS "${BOARD_NUTTX_PATCH_DIR}")
+	file(GLOB BOARD_NUTTX_PATCHES "${BOARD_NUTTX_PATCH_DIR}/*.patch")
+	list(SORT BOARD_NUTTX_PATCHES)
+	foreach(_patch IN LISTS BOARD_NUTTX_PATCHES)
+		execute_process(
+			COMMAND git -C ${NUTTX_DIR} apply --check ${_patch}
+			RESULT_VARIABLE _patch_check
+			OUTPUT_QUIET ERROR_QUIET
+		)
+		if(_patch_check EQUAL 0)
+			message(STATUS "Applying NuttX patch: ${_patch}")
+			execute_process(
+				COMMAND git -C ${NUTTX_DIR} apply ${_patch}
+				RESULT_VARIABLE _patch_apply
+			)
+			if(NOT _patch_apply EQUAL 0)
+				message(FATAL_ERROR "Failed to apply NuttX patch: ${_patch}")
+			endif()
+		else()
+			execute_process(
+				COMMAND git -C ${NUTTX_DIR} apply --reverse --check ${_patch}
+				RESULT_VARIABLE _patch_reverse_check
+				OUTPUT_QUIET ERROR_QUIET
+			)
+			if(_patch_reverse_check EQUAL 0)
+				message(STATUS "NuttX patch already applied: ${_patch}")
+			else()
+				message(FATAL_ERROR
+					"NuttX patch neither applicable nor already applied: ${_patch}\n"
+					"  Inspect NuttX submodule state at ${NUTTX_DIR}")
+			endif()
+		endif()
+		set_property(DIRECTORY APPEND PROPERTY CMAKE_CONFIGURE_DEPENDS ${_patch})
+	endforeach()
+endif()
+
 # make olddefconfig (inflate defconfig to full .config)
 execute_process(COMMAND ${CMAKE_COMMAND} -E make_directory ${NUTTX_CONFIG_DIR}/src) # needed for NuttX build
 execute_process(COMMAND ${CMAKE_COMMAND} -E copy_if_different ${NUTTX_SRC_DIR}/Make.defs.in ${NUTTX_DIR}/Make.defs) # Create a temporary Toplevel Make.defs for the oldconfig step

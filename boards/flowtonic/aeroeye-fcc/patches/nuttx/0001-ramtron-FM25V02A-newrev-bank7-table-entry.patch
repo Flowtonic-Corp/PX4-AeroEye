@@ -1,0 +1,28 @@
+diff --git a/drivers/mtd/ramtron.c b/drivers/mtd/ramtron.c
+index 4d3a487cc0..3d9358ef85 100644
+--- a/drivers/mtd/ramtron.c
++++ b/drivers/mtd/ramtron.c
+@@ -201,6 +201,23 @@ static const struct ramtron_parts_s g_ramtron_parts[] =
+ #ifdef CONFIG_RAMTRON_CHUNKING
+     , false,                      /* chunked */
+     RAMTRON_EMULATE_PAGE_SIZE     /* chunksize */
++#endif
++  },
++  {
++    /* FM25V02A newer silicon revision (JEDEC bank 7 manufacturer ID with
++     * 6x 0x7F continuation bytes instead of 5, revision code 0x48).
++     * The 6-iter manufacturer loop consumes all 6 continuation bytes;
++     * subsequent reads return memory=0xC2, capacity=0x22, part=0x48.
++     */
++    "FM25V02A-newrev",            /* name */
++    0x22,                         /* id1 = capacity */
++    0x48,                         /* id2 = part */
++    32L * 1024L,                  /* size */
++    2,                            /* addr_len */
++    RAMTRON_INIT_CLK_MAX          /* speed */
++#ifdef CONFIG_RAMTRON_CHUNKING
++    , false,                      /* chunked */
++    RAMTRON_EMULATE_PAGE_SIZE     /* chunksize */
+ #endif
+   },
+   {
