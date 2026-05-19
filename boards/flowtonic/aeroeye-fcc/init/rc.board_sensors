@@ -17,6 +17,10 @@ then
 	# BMP581 barometer (SPI4, CS=PF10, DRDY=PE7)
 	bmp581 -s start
 
+	# BMI088 (SPI5, ACC CS=PI4 + GYRO CS=PI10) — 보드 하단 mount → ROLL_180
+	bmi088 -A -R 8 -s start
+	bmi088 -G -R 8 -s start
+
 elif ver hwtypecmp V5005002 V5006002
 then
 	# Internal SPI bus ICM-42688-P
