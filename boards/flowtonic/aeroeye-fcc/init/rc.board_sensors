@@ -1,64 +1,22 @@
 #!/bin/sh
 #
-# Flowtonic AeroEye FCC specific board sensors init (fmu-v5 base)
+# Flowtonic AeroEye FCC specific board sensors init
+# AeroEye 는 V553 (V5005003) 단일 HW version 만 존재.
+# fmu-v5 stock 의 V552/V562/else 분기는 우리 보드에 해당 없어 삭제.
 #------------------------------------------------------------------------------
 
 board_adc start
 
-if ver hwtypecmp V5005003
-then
-	# ==========================================================
-	# Flowtonic AeroEye FCC (V553) — Phase A: ICM-42688-P only
-	# Phase B (BMI088) / C (BMP581) / D (IST8310 + ELVX) 후속 추가
-	# ==========================================================
-	# ICM-42688-P 가 보드 하단에 장착 → ROLL_180 (ROTATION enum = 8)
-	icm42688p -s -R 8 -q start
+# ICM-42688-P 가 보드 하단에 장착 → ROLL_180 (ROTATION enum = 8)
+icm42688p -s -R 8 -q start
 
-	# BMP581 barometer (SPI4, CS=PF10, DRDY=PE7)
-	bmp581 -s start
+# BMP581 barometer (SPI4, CS=PF10, DRDY=PE7)
+bmp581 -s start
 
-	# BMI088 (SPI5, ACC CS=PI4 + GYRO CS=PI10) — 보드 하단 mount → ROLL_180
-	bmi088 -A -R 8 -s start
-	bmi088 -G -R 8 -s start
+# BMI088 (SPI5, ACC CS=PI4 + GYRO CS=PI10) — 보드 하단 mount → ROLL_180
+bmi088 -A -R 8 -s start
+bmi088 -G -R 8 -s start
 
-elif ver hwtypecmp V5005002 V5006002
-then
-	# Internal SPI bus ICM-42688-P
-	icm42688p -s -R 2 -q start
-
-	# Internal SPI bus ICM-20689
-	icm20689 -s -R 2 start
-
-	# Internal SPI bus BMI055 accel/gyro
-	bmi055 -A -R 2 -s start
-	bmi055 -G -R 2 -s start
-
-	# Baro on internal SPI
-	ms5611 -s start
-
-	# internal compass
-	ist8310 -I -R 10 start
-
-	# External compass on GPS1/I2C1
-	ist8310 -X -b 1 -R 10 start
-
-else
-	# Internal SPI bus ICM-20602
-	icm20602 -s -R 2 -q start
-
-	# Internal SPI bus ICM-20689
-	icm20689 -s -R 2 start
-
-	# Internal SPI bus BMI055 accel/gyro
-	bmi055 -A -R 2 -s start
-	bmi055 -G -R 2 -s start
-
-	# Baro on internal SPI
-	ms5611 -s start
-
-	# internal compass
-	ist8310 -I -R 10 start
-
-	# External compass on GPS1/I2C1
-	ist8310 -X -b 1 -R 10 start
-fi
+# IST8310 internal magnetometer (I2C3 = PH7/PH8, addr 0x0E, DRDY=PD15)
+# 보드 하단 mount + 부품좌표 180° → ICM 과 동일 방향 → ROLL_180 (-R 8) 1차 시도
+ist8310 -I -b 3 -R 8 start
