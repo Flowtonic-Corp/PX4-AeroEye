@@ -9,6 +9,19 @@ param set-default BAT2_V_DIV 18.1
 param set-default BAT1_A_PER_V 36.367515152
 param set-default BAT2_A_PER_V 36.367515152
 
+# Power module auto-acceptance (I2C + DroneCAN)
+# FCC 가 상황에 따라 어떤 파워모듈을 꽂아도 자동 수용하도록 기본 ON.
+# I2C: INA226/228/238 모두 enable → 외부 I2C 버스(POWER_2=I2C2 포함) probe,
+#      실제 꽂힌 칩의 드라이버만 칩ID 매칭으로 부착 (PM02D = INA228 @0x45).
+param set-default SENS_EN_INA226 1
+param set-default SENS_EN_INA228 1
+param set-default SENS_EN_INA238 1
+# DroneCAN: 센서 + 동적 노드ID(2), 배터리 구독(raw=1).
+# 주의 — CAN1 트랜시버(U3 TJA1051) S 핀이 R9 풀업으로 영구 Silent 라,
+#        실제 통신은 R9 제거(HW ECO) 후에야 동작. 그 전까지 노드만 미수신.
+param set-default UAVCAN_ENABLE 2
+param set-default UAVCAN_SUB_BAT 1
+
 if ver hwtypecmp V5005000 V5005002 V5006000 V5006002
 then
 	# CUAV V5+ (V550/V552) and V5nano (V560/V562) have 3 IMUs
