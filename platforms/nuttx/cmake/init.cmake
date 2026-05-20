@@ -72,28 +72,34 @@ if(EXISTS "${BOARD_NUTTX_PATCH_DIR}")
 	file(GLOB BOARD_NUTTX_PATCHES "${BOARD_NUTTX_PATCH_DIR}/*.patch")
 	list(SORT BOARD_NUTTX_PATCHES)
 	foreach(_patch IN LISTS BOARD_NUTTX_PATCHES)
+		# Probe "already applied" FIRST via reverse-check. A forward --check
+		# can wrongly succeed again after the patch is applied when the patch's
+		# inserted block is self-similar to its own context (e.g. a table entry
+		# whose trailing lines match the anchor), which would duplicate it on
+		# every reconfigure. reverse-check is unambiguous: it only succeeds once
+		# the added lines are present, so it gates application correctly.
 		execute_process(
-			COMMAND git -C ${NUTTX_DIR} apply --check ${_patch}
-			RESULT_VARIABLE _patch_check
+			COMMAND git -C ${NUTTX_DIR} apply --reverse --check ${_patch}
+			RESULT_VARIABLE _patch_reverse_check
 			OUTPUT_QUIET ERROR_QUIET
 		)
-		if(_patch_check EQUAL 0)
-			message(STATUS "Applying NuttX patch: ${_patch}")
-			execute_process(
-				COMMAND git -C ${NUTTX_DIR} apply ${_patch}
-				RESULT_VARIABLE _patch_apply
-			)
-			if(NOT _patch_apply EQUAL 0)
-				message(FATAL_ERROR "Failed to apply NuttX patch: ${_patch}")
-			endif()
+		if(_patch_reverse_check EQUAL 0)
+			message(STATUS "NuttX patch already applied: ${_patch}")
 		else()
 			execute_process(
-				COMMAND git -C ${NUTTX_DIR} apply --reverse --check ${_patch}
-				RESULT_VARIABLE _patch_reverse_check
+				COMMAND git -C ${NUTTX_DIR} apply --check ${_patch}
+				RESULT_VARIABLE _patch_check
 				OUTPUT_QUIET ERROR_QUIET
 			)
-			if(_patch_reverse_check EQUAL 0)
-				message(STATUS "NuttX patch already applied: ${_patch}")
+			if(_patch_check EQUAL 0)
+				message(STATUS "Applying NuttX patch: ${_patch}")
+				execute_process(
+					COMMAND git -C ${NUTTX_DIR} apply ${_patch}
+					RESULT_VARIABLE _patch_apply
+				)
+				if(NOT _patch_apply EQUAL 0)
+					message(FATAL_ERROR "Failed to apply NuttX patch: ${_patch}")
+				endif()
 			else()
 				message(FATAL_ERROR
 					"NuttX patch neither applicable nor already applied: ${_patch}\n"
