@@ -35,3 +35,9 @@ ina238 -X -b 2 -t 1 start
 
 # ELVX-L05D airspeed (I2C2 = POWER_2, addr 0x28). probe-gated: 칩 없으면 미시작.
 elvx -X -b 2 start
+
+# Airspeed estimator on ALL frames (monitoring). PX4 stock starts this only
+# for FW/VTOL (rc.fw_apps / rc.vtol_apps); start here so quad/VTOL/FW all
+# expose airspeed_validated (QGC airspeed). Harmless on MC — not used for
+# control, and the airspeed preflight check is FW/VTOL-only (airspeedCheck.cpp).
+airspeed_selector start

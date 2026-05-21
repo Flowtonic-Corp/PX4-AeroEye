@@ -18,6 +18,10 @@ param set-default UAVCAN_SUB_BAT 1
 # 주: I2C 파워모니터(INA226/228/238)는 SENS_EN_* 자동시작 글루가 없어
 #     rc.board_sensors 에서 명시적으로 start 한다 (param 으로 켜지 않음).
 
+# 보드에 airspeed 센서(ELVX-L05D, I2C2) 있음. FW/VTOL 의 airspeed 프리플라이트
+# 체크 활성화. MC 에서는 체크가 스킵되므로(airspeedCheck.cpp) arming 영향 없음.
+param set-default SYS_HAS_NUM_ASPD 1
+
 if ver hwtypecmp V5005000 V5005002 V5006000 V5006002
 then
 	# CUAV V5+ (V550/V552) and V5nano (V560/V562) have 3 IMUs
