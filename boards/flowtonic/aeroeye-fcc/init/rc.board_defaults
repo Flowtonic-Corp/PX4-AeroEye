@@ -22,6 +22,15 @@ param set-default UAVCAN_SUB_BAT 1
 # 체크 활성화. MC 에서는 체크가 스킵되므로(airspeedCheck.cpp) arming 영향 없음.
 param set-default SYS_HAS_NUM_ASPD 1
 
+# 써멀 아일랜드 IMU 히터 (heater 드라이버 → FMU PA7 GPIO, HEATER_GPIO 경로).
+# 두 IMU 모두 써멀 아일랜드 실장. 히터는 sensor_accel 온도로 PID 제어하므로
+# 단일 다이·온도 깨끗한 ICM-42688-P(SPI1) 를 피드백 센서로 사용.
+#   SENS_TEMP_ID = 2490378 = ICM-42688-P accel device_id (Type 0x26, SPI1).
+#   SENS_TEMP_ID 가 0 이면 heater 드라이버가 즉시 exit (heater.cpp:278).
+param set-default SENS_EN_THERMAL 1
+param set-default SENS_TEMP_ID 2490378
+param set-default SENS_IMU_TEMP 55
+
 if ver hwtypecmp V5005000 V5005002 V5006000 V5006002
 then
 	# CUAV V5+ (V550/V552) and V5nano (V560/V562) have 3 IMUs
