@@ -26,7 +26,9 @@ ist8310 -I -b 3 -R 8 start
 # 다른 센서들처럼 여기서 명시적으로 start 한다.
 # 세 드라이버를 모두 띄우되 각자 칩ID probe 로 실제 꽂힌 칩만 부착:
 #   INA226 @0x41 / INA228 @0x45 (= Holybro PM02D) / INA238 @0x45.
-# -k : 부팅 후 모듈을 연결해도 인식 (probe 재시도 유지). -t 1 : 배터리 인덱스 1.
-ina226 -X -b 2 -t 1 -k start
-ina228 -X -b 2 -t 1 -k start
-ina238 -X -b 2 -t 1 -k start
+# -k(keep running) 미사용: 부팅 시 1회 probe → 칩 없으면 PX4_ERROR 로 미시작
+# (빈 배터리 인스턴스 생성 안 함). 꽂힌 칩 1개만 살아남음. -t 1 : 배터리 인덱스 1.
+# 파워모듈은 부팅 시 항상 연결돼 있으므로 -k 불필요.
+ina226 -X -b 2 -t 1 start
+ina228 -X -b 2 -t 1 start
+ina238 -X -b 2 -t 1 start
