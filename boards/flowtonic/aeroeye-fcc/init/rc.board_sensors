@@ -20,3 +20,13 @@ bmi088 -G -R 8 -s start
 # IST8310 internal magnetometer (I2C3 = PH7/PH8, addr 0x0E, DRDY=PD15)
 # 보드 하단 mount + 부품좌표 180° → ICM 과 동일 방향 → ROLL_180 (-R 8) 1차 시도
 ist8310 -I -b 3 -R 8 start
+
+# I2C power monitors on I2C2 (POWER_2 커넥터, 외부버스).
+# SENS_EN_INA* 는 이 PX4 버전에서 자동시작 글루가 없어(소비처=pm_selector뿐),
+# 다른 센서들처럼 여기서 명시적으로 start 한다.
+# 세 드라이버를 모두 띄우되 각자 칩ID probe 로 실제 꽂힌 칩만 부착:
+#   INA226 @0x41 / INA228 @0x45 (= Holybro PM02D) / INA238 @0x45.
+# -k : 부팅 후 모듈을 연결해도 인식 (probe 재시도 유지). -t 1 : 배터리 인덱스 1.
+ina226 -X -b 2 -t 1 -k start
+ina228 -X -b 2 -t 1 -k start
+ina238 -X -b 2 -t 1 -k start
