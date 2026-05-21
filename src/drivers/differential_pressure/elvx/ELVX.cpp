@@ -132,9 +132,10 @@ void ELVX::RunImpl()
 			// Constant 0.18984 cross-checked against AllSensors DLVR transfer
 			// function (docs/elvx_driver_research.md sec.A.2; algorithm
 			// reference only, no GPL code copied).
-			// TODO(HW): confirm sign on bench (blow test). DLVR convention is
-			//           positive (no inversion); negate if pitot ports require.
-			const float diff_press_pa = (pressure_raw - 8192) * 0.18984f;
+			// Sign: bench port-press test showed Hi(+) port pressure -> negative
+			// raw delta on this build, so negate to make forward airflow
+			// (Hi/total > Lo/static) read POSITIVE per PX4 convention.
+			const float diff_press_pa = -(pressure_raw - 8192) * 0.18984f;
 
 			const float temperature_c = ((200.f * temperature_raw) / 2047.f) - 50.f;
 
