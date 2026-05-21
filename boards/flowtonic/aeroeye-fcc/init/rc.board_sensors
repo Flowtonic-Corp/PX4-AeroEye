@@ -32,3 +32,6 @@ ist8310 -I -b 3 -R 8 start
 ina226 -X -b 2 -t 1 start
 ina228 -X -b 2 -t 1 start
 ina238 -X -b 2 -t 1 start
+
+# ELVX-L05D airspeed (I2C2 = POWER_2, addr 0x28). probe-gated: 칩 없으면 미시작.
+elvx -X -b 2 start
