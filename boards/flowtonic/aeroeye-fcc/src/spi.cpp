@@ -128,7 +128,7 @@ constexpr px4_spi_bus_all_hw_t px4_spi_buses_all_hw[BOARD_NUM_SPI_CFG_HW_VERSION
 		// SPI5: BMI088 (dual ACC + GYRO on same bus, separate CS)
 		initSPIBus(SPI::Bus::SPI5, {
 			initSPIDevice(DRV_ACC_DEVTYPE_BMI088, SPI::CS{GPIO::PortI, GPIO::Pin4},  SPI::DRDY{GPIO::PortB, GPIO::Pin15}),
-			initSPIDevice(DRV_GYR_DEVTYPE_BMI088, SPI::CS{GPIO::PortI, GPIO::Pin10}, SPI::DRDY{GPIO::PortC, GPIO::Pin13}),
+			initSPIDevice(DRV_GYR_DEVTYPE_BMI088, SPI::CS{GPIO::PortI, GPIO::Pin10}, SPI::DRDY{GPIO::PortB, GPIO::Pin14}),
 		}),
 		initSPIBusExternal(SPI::Bus::SPI6, {
 			initSPIConfigExternal(SPI::CS{GPIO::PortI, GPIO::Pin6}),
