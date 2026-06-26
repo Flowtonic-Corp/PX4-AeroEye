@@ -3,11 +3,11 @@
 # board specific defaults
 #------------------------------------------------------------------------------
 
-param set-default BAT1_V_DIV 18.1
-param set-default BAT2_V_DIV 18.1
+# param set-default BAT1_V_DIV 18.1
+# param set-default BAT2_V_DIV 18.1
 
-param set-default BAT1_A_PER_V 36.367515152
-param set-default BAT2_A_PER_V 36.367515152
+# param set-default BAT1_A_PER_V 36.367515152
+# param set-default BAT2_A_PER_V 36.367515152
 
 # DroneCAN 파워모듈 자동 수용: 센서 + 동적 노드ID(2), 배터리 구독(raw=1).
 # (UAVCAN_ENABLE 은 rcS 에서 소비되어 uavcan 을 자동 start 함 — 검증됨)
